@@ -215,11 +215,11 @@ class UM7(object):
             count += 1
             if self.serial.inWaiting() > 100:
                 byte = self.serial.read(size=1)
-                if byte == 's':
+                if byte == 's'.encode ('ascii'):
                     byte2 = self.serial.read(size=1)
-                    if byte2 == 'n':
+                    if byte2 == 'n'.encode ('ascii'):
                         byte3 = self.serial.read(size=1)
-                        if byte3 == 'p':
+                        if byte3 == 'p'.encode ('ascii'):
                             foundpacket = 1
                             break
         if foundpacket == 0:
