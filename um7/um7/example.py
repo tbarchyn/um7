@@ -1,4 +1,4 @@
-from um7 import UM7array
+from .um7 import UM7array
 
 name1 = 'sensor1'
 name2 = 'sensor2'
@@ -18,7 +18,7 @@ sensor_array.settimer()
 
 while True:
     sensor_array.catchsample()
-    print sensor_array.state
+    print(sensor_array.state)
 
 # use 'measurements' list to dictate what variables are read
 # UM7array.btstart() puts bt module into fast module

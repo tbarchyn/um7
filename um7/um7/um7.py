@@ -50,7 +50,7 @@ class UM7array(object):
     def __del__(self):
         for i in self.sensors:
             i.serial.close()
-        print 'Array closed.'
+        print('Array closed.')
 
     def settimer(self):
         self.t0 = time.time()
@@ -84,7 +84,7 @@ class UM7array(object):
     def updatestate(self):
         self.state.update({'time': time.time() - self.t0})  # maybe mask other sensor states to avoid oversampling
         for i in self.sensors:                              # also it lets you take more accurate time measurements
-            sensorstate = {k: v for k, v in i.state.items()}
+            sensorstate = {k: v for k, v in list(i.state.items())}
             sensorstate.pop(i.name + ' time')
             self.state.update(sensorstate)
 
@@ -130,10 +130,10 @@ class UM7(object):
         try:
             self.serial = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1, timeout=0)  # Open serial device
             self.serial.flushInput()
-            self.serial.write('$$$')
-            print 'Successfully connected to %s UM7!' % self.name
+            self.serial.write('$$$'.encode ('ascii'))
+            print('Successfully connected to %s UM7!' % self.name)
         except OSError:
-            print 'Could not connect to %s UM7. Is it plugged in or being used by another program?' % self.name
+            print('Could not connect to %s UM7. Is it plugged in or being used by another program?' % self.name)
 
     def __del__(self):
         """Closes virtual com port
@@ -141,7 +141,7 @@ class UM7(object):
         :return: None
         """
         self.serial.close()
-        print '%s serial device closed' % self.name
+        print('%s serial device closed' % self.name)
 
     def __name__(self):
         return self.name
@@ -176,7 +176,7 @@ class UM7(object):
                                                                             # var in statevar minus 'time'
                 break  # Then we have all new data and can move on
         if list(set(self.statevars) - set(sample.keys())) != [self.name + ' time']:  # In case we timed out before we caught every var we want
-            print 'Missed some vars!', self.serial.inWaiting()
+            print('Missed some vars!', self.serial.inWaiting())
             # return False
         if sample:  # If we have any new data
             self.updatestate(sample)  # Update the sensor state
@@ -278,19 +278,19 @@ class UM7(object):
 
         :return: True or False based on success of request
         """
-        print 'Zeroing ' + self.name + ' gyros...'
-        self.serial.write('F,1\n')
+        print('Zeroing ' + self.name + ' gyros...')
+        self.serial.write('F,1\n'.encode ('ascii'))
         self.request('zerogyros')
         timeout = time.time() + 0.5
         while time.time() < timeout:
             self.request('zerogyros')
             [foundpacket, hasdata, startaddress, data, commandfailed] = self.readpacket()
             if startaddress == name2hex_reg['zerogyros'] and commandfailed == 0:
-                print 'Successfully zeroed gyros.'
+                print('Successfully zeroed gyros.')
                 return True
             if self.serial.inWaiting() > 500:
                 self.serial.flushInput()
-        print 'Could not zero gyros.'
+        print('Could not zero gyros.')
         return False
 
     def resetekf(self):
@@ -298,35 +298,35 @@ class UM7(object):
 
         :return: True or False based on success of request
         """
-        print 'Resetting ' + self.name + ' EFK...'
-        self.serial.write('F,1\n')
+        print('Resetting ' + self.name + ' EFK...')
+        self.serial.write('F,1\n'.encode ('ascii'))
         self.request('resetekf')
         timeout = time.time() + 0.5
         while time.time() < timeout:
             self.request('resetekf')
             [foundpacket, hasdata, startaddress, data, commandfailed] = self.readpacket()
             if startaddress == name2hex_reg['resetekf'] and commandfailed == 0:
-                print 'Successfully reset EKF.'
+                print('Successfully reset EKF.')
                 return True
             if self.serial.inWaiting() > 500:
                 self.serial.flushInput()
-        print 'Could not reset EKF.'
+        print('Could not reset EKF.')
         return False
 
     def btstart(self):
         self.serial.flushInput()
         buff = 0
         while not buff:
-            self.serial.write('F,1\n')
+            self.serial.write('F,1\n'.encode ('ascii'))
             buff = self.serial.inWaiting()
             time.sleep(0.1)
 
     def updatestate(self, sample):
         sample.update({self.name + ' time': time.time() - self.t0})
-        todelete = list(set(sample.keys()).difference(self.state.keys()))
+        todelete = list(set(sample.keys()).difference(list(self.state.keys())))
         for i in todelete:
             sample.pop(i)
-        mask = {k: v for k, v in self.statemask.items()}
+        mask = {k: v for k, v in list(self.statemask.items())}
         mask.update(sample)
         self.state.update(mask)
 
