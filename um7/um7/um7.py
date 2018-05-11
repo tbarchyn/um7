@@ -26,6 +26,7 @@ import binascii
 import struct
 import numpy
 import sys
+import codecs
 
 
 class UM7array(object):
@@ -423,10 +424,10 @@ def parsedatabatch(data, startaddress, devicename):
             del datasplit[3]  # Delete unused data bytes
             for j in range(len(datasplit)):
                 if j < len(datasplit) - 3:  # Euler angle bytes
-                    datasplit[j] = struct.unpack('!h', datasplit[j].decode('hex'))[0] / 91.02222  # Convert hex str to floating point
+                    datasplit[j] = struct.unpack('!h', codecs.decode (datasplit[j], 'hex'))[0] / 91.02222  # Convert hex str to floating point
                     # and convert using constant  # Euler angle rate bytes
                 else:
-                    datasplit[j] = struct.unpack('!h', datasplit[j].decode('hex'))[0] / 16.0  # Convert hex str to floating
+                    datasplit[j] = struct.unpack('!h', codecs.decode (datasplit[j], 'hex'))[0] / 16.0  # Convert hex str to floating
                     # point and convert using constant
             output = {r: datasplit[0], p: datasplit[1], y: datasplit[2], rr: datasplit[3], yr: datasplit[4], pr: datasplit[5]}
         else:
